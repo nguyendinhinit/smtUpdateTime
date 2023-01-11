@@ -27,9 +27,9 @@ public abstract class UpdateTime<R extends ConnectRecord<R>> implements Transfor
     private static final String OVERVIEW_DOC = "Insert a upd_tm to current GMT+07 timezone";
 
     private interface ConfigName {
-        String UPD_TIME_FIELD_NAME = "field.name";
+        String UPD_TIME_FIELD_NAME = "Field Name";
         String UPD_TIME_DEFAULT_VALUE = "upd_tm";
-        String TIME_ZONE = "time.zone";
+        String TIME_ZONE = "Time Zone";
         String TIME_ZONE_DEFAULT_VALUE="UTC";
         String PATTERN_FORMAT_FIELD_NAME="Date Pattern";
         String PATTERN_FORMAT_DEFAULT_VALUE="yyyy-MM-dd HH:mm:ss";
