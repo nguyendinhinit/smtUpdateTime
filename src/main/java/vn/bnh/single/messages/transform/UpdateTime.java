@@ -30,7 +30,7 @@ public abstract class UpdateTime<R extends ConnectRecord<R>> implements Transfor
         String UPD_TIME_FIELD_NAME = "Field Name";
         String UPD_TIME_DEFAULT_VALUE = "upd_tm";
         String TIME_ZONE = "Time Zone";
-        String TIME_ZONE_DEFAULT_VALUE="UTC";
+        String TIME_ZONE_DEFAULT_VALUE="Asia/Ho_Chi_Minh";
         String PATTERN_FORMAT_FIELD_NAME="Date Pattern";
         String PATTERN_FORMAT_DEFAULT_VALUE="yyyy-MM-dd HH:mm:ss";
     }
