@@ -36,7 +36,7 @@ public abstract class UpdateTime<R extends ConnectRecord<R>> implements Transfor
     }
 
     public static final ConfigDef CONFIG_DEF = new ConfigDef().define(ConfigName.UPD_TIME_FIELD_NAME, ConfigDef.Type.STRING, ConfigName.UPD_TIME_DEFAULT_VALUE, ConfigDef.Importance.HIGH, "Field name for update time").define(ConfigName.TIME_ZONE,ConfigDef.Type.STRING,ConfigName.TIME_ZONE_DEFAULT_VALUE, ConfigDef.Importance.HIGH,"Time Zone Field").define(ConfigName.PATTERN_FORMAT_FIELD_NAME,ConfigDef.Type.STRING,ConfigName.PATTERN_FORMAT_DEFAULT_VALUE,ConfigDef.Importance.HIGH,"Date Pattern");
-    public static final String PURPOSE = "adding update time from kafka to database";
+    public static final String PURPOSE = "Adding update time from kafka to database";
     private String fieldName;
     private String timezone;
     private String pattern;
