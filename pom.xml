@@ -6,7 +6,7 @@
 
     <groupId>vn.bnh.single.messages.transform</groupId>
     <artifactId>UpdateTime</artifactId>
-    <version>2.0</version>
+    <version>2.0.4</version>
 
     <name>SMT</name>
     <!-- FIXME change it to the project's website -->
@@ -60,6 +60,7 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.0.6</version>
         </dependency>
+
 
 
     </dependencies>

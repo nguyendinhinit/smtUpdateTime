@@ -1,5 +1,6 @@
 package vn.bnh.single.messages.transform;
 
+
 import org.apache.kafka.common.cache.Cache;
 import org.apache.kafka.common.cache.LRUCache;
 import org.apache.kafka.common.cache.SynchronizedCache;
@@ -53,6 +54,9 @@ public abstract class UpdateTime<R extends ConnectRecord<R>> implements Transfor
 
     @Override
     public R apply(R record) {
+        if (operatingValue(record) == null) {
+            return record;
+        }
         if (operatingSchema(record) == null) {
             return applySchemaless(record);
         } else {
@@ -62,41 +66,26 @@ public abstract class UpdateTime<R extends ConnectRecord<R>> implements Transfor
 
     private R applySchemaless(R record) {
         final Map<String, Object> value = requireMap(operatingValue(record), PURPOSE);
-
         final Map<String, Object> updatedValue = new HashMap<>(value);
+        updatedValue.put(fieldName, getCurrentTime());
+        return newRecord(record, null, updatedValue);
 
-        if (record.value() == null) {
-            return record;
-        } else {
-            updatedValue.put(fieldName, getCurrentTime());
-
-            return newRecord(record, null, updatedValue);
-        }
     }
 
 
     private R applyWithSchema(R record) {
         final Struct value = requireStruct(operatingValue(record), PURPOSE);
-
-        if (record.value() == null) {
-            return record;
-        } else {
-            Schema updatedSchema = schemaUpdateCache.get(value.schema());
-            if (updatedSchema == null) {
-                updatedSchema = makeUpdatedSchema(value.schema());
-                schemaUpdateCache.put(value.schema(), updatedSchema);
-            }
-
-            final Struct updatedValue = new Struct(updatedSchema);
-
-            for (Field field : value.schema().fields()) {
-                updatedValue.put(field.name(), value.get(field));
-            }
-
-            updatedValue.put(fieldName, getCurrentTime());
-
-            return newRecord(record, updatedSchema, updatedValue);
+        Schema updatedSchema = schemaUpdateCache.get(value.schema());
+        if (updatedSchema == null) {
+            updatedSchema = makeUpdatedSchema(value.schema());
+            schemaUpdateCache.put(value.schema(), updatedSchema);
         }
+        final Struct updatedValue = new Struct(updatedSchema);
+        for (Field field : value.schema().fields()) {
+            updatedValue.put(field.name(), value.get(field));
+        }
+        updatedValue.put(fieldName, getCurrentTime());
+        return newRecord(record, updatedSchema, updatedValue);
     }
 
     @Override
