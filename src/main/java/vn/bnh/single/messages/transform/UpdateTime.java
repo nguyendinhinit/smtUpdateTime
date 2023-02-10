@@ -30,12 +30,12 @@ public abstract class UpdateTime<R extends ConnectRecord<R>> implements Transfor
         String UPD_TIME_FIELD_NAME = "Field Name";
         String UPD_TIME_DEFAULT_VALUE = "upd_tm";
         String TIME_ZONE = "Time Zone";
-        String TIME_ZONE_DEFAULT_VALUE="Asia/Ho_Chi_Minh";
-        String PATTERN_FORMAT_FIELD_NAME="Date Pattern";
-        String PATTERN_FORMAT_DEFAULT_VALUE="yyyy-MM-dd HH:mm:ss";
+        String TIME_ZONE_DEFAULT_VALUE = "Asia/Ho_Chi_Minh";
+        String PATTERN_FORMAT_FIELD_NAME = "Date Pattern";
+        String PATTERN_FORMAT_DEFAULT_VALUE = "yyyy-MM-dd HH:mm:ss";
     }
 
-    public static final ConfigDef CONFIG_DEF = new ConfigDef().define(ConfigName.UPD_TIME_FIELD_NAME, ConfigDef.Type.STRING, ConfigName.UPD_TIME_DEFAULT_VALUE, ConfigDef.Importance.HIGH, "Field name for update time").define(ConfigName.TIME_ZONE,ConfigDef.Type.STRING,ConfigName.TIME_ZONE_DEFAULT_VALUE, ConfigDef.Importance.HIGH,"Time Zone Field").define(ConfigName.PATTERN_FORMAT_FIELD_NAME,ConfigDef.Type.STRING,ConfigName.PATTERN_FORMAT_DEFAULT_VALUE,ConfigDef.Importance.HIGH,"Date Pattern");
+    public static final ConfigDef CONFIG_DEF = new ConfigDef().define(ConfigName.UPD_TIME_FIELD_NAME, ConfigDef.Type.STRING, ConfigName.UPD_TIME_DEFAULT_VALUE, ConfigDef.Importance.HIGH, "Field name for update time").define(ConfigName.TIME_ZONE, ConfigDef.Type.STRING, ConfigName.TIME_ZONE_DEFAULT_VALUE, ConfigDef.Importance.HIGH, "Time Zone Field").define(ConfigName.PATTERN_FORMAT_FIELD_NAME, ConfigDef.Type.STRING, ConfigName.PATTERN_FORMAT_DEFAULT_VALUE, ConfigDef.Importance.HIGH, "Date Pattern");
     public static final String PURPOSE = "Adding update time from kafka to database";
     private String fieldName;
     private String timezone;
@@ -65,29 +65,38 @@ public abstract class UpdateTime<R extends ConnectRecord<R>> implements Transfor
 
         final Map<String, Object> updatedValue = new HashMap<>(value);
 
-        updatedValue.put(fieldName, getCurrentTime());
+        if (record.value() == null) {
+            return record;
+        } else {
+            updatedValue.put(fieldName, getCurrentTime());
 
-        return newRecord(record, null, updatedValue);
+            return newRecord(record, null, updatedValue);
+        }
     }
+
 
     private R applyWithSchema(R record) {
         final Struct value = requireStruct(operatingValue(record), PURPOSE);
 
-        Schema updatedSchema = schemaUpdateCache.get(value.schema());
-        if (updatedSchema == null) {
-            updatedSchema = makeUpdatedSchema(value.schema());
-            schemaUpdateCache.put(value.schema(), updatedSchema);
+        if (record.value() == null) {
+            return record;
+        } else {
+            Schema updatedSchema = schemaUpdateCache.get(value.schema());
+            if (updatedSchema == null) {
+                updatedSchema = makeUpdatedSchema(value.schema());
+                schemaUpdateCache.put(value.schema(), updatedSchema);
+            }
+
+            final Struct updatedValue = new Struct(updatedSchema);
+
+            for (Field field : value.schema().fields()) {
+                updatedValue.put(field.name(), value.get(field));
+            }
+
+            updatedValue.put(fieldName, getCurrentTime());
+
+            return newRecord(record, updatedSchema, updatedValue);
         }
-
-        final Struct updatedValue = new Struct(updatedSchema);
-
-        for (Field field : value.schema().fields()) {
-            updatedValue.put(field.name(), value.get(field));
-        }
-
-        updatedValue.put(fieldName, getCurrentTime());
-
-        return newRecord(record, updatedSchema, updatedValue);
     }
 
     @Override
